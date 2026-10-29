@@ -28,24 +28,11 @@ jobs:
         working-directory: services/update
         run: bun run typecheck:tsc
 
-      - name: Provision D1 Database and Migrate
+      - name: Migrate D1 Database
         working-directory: services/update
         run: |
-          set -e
-          echo "Checking D1 database..."
-          DB_INFO=$(bunx wrangler d1 info rovie-code-update --json 2>/dev/null || true)
-          DB_ID=$(echo "$DB_INFO" | jq -r '.uuid // empty' 2>/dev/null || true)
-          if [ -z "$DB_ID" ]; then
-            echo "Creating D1 database rovie-code-update..."
-            CREATE_INFO=$(bunx wrangler d1 create rovie-code-update --json 2>/dev/null || true)
-            DB_ID=$(echo "$CREATE_INFO" | jq -r '.uuid // empty' 2>/dev/null || true)
-          fi
-          if [ -n "$DB_ID" ]; then
-            echo "Resolved D1 Database ID: $DB_ID"
-            sed -i "s/\"database_id\": \"[^\"]*\"/\"database_id\": \"$DB_ID\"/" wrangler.jsonc
-            echo "Applying migrations..."
-            bun run db:migrate || true
-          fi
+          echo "Applying migrations to D1 database..."
+          bun run db:migrate || true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 

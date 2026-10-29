@@ -9,7 +9,7 @@
     {
       "binding": "DB",
       "database_name": "rovie-code-update",
-      "database_id": "rovie-code-update",
+      "database_id": "0f0d6f15-4b44-4c7b-af48-8b784571a211",
       "migrations_dir": "migrations",
     },
   ],
