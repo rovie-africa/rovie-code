@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Rovie Code
+Exec=/opt/RovieCode/africa.rovie.code %U
+Terminal=false
+Type=Application
+Icon=africa.rovie.code
+StartupWMClass=africa.rovie.code
+NoDisplay=true
+Comment=AI coding agent powered by Rovie Route
+Categories=Development;

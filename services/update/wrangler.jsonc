@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rovie-code-update",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-21",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "update.rovie.africa",
+      "custom_domain": true,
+    },
+    {
+      "pattern": "rovie.africa/update",
+      "zone_name": "rovie.africa",
+    },
+    {
+      "pattern": "rovie.africa/update/*",
+      "zone_name": "rovie.africa",
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rovie-code-update",
+      "database_id": "2c010a96-811f-43d5-804d-7188534e5858",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+  },
+}

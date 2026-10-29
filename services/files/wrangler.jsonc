@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rovie-code-files",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "env": {
+    "dev": {
+      "name": "rovie-code-dev-files",
+      "routes": [{ "pattern": "dev.rovie.africa/files/*", "zone_name": "rovie.africa" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "rovie-code-dev-files" }],
+    },
+    "production": {
+      "name": "rovie-code-production-files",
+      "routes": [{ "pattern": "rovie.africa/files/*", "zone_name": "rovie.africa" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "rovie-code-production-files" }],
+    },
+  },
+}
