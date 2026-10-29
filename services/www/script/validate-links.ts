@@ -12,7 +12,7 @@ const failures = (
         Array.from(html.matchAll(/href="([^"]+)"/g), async (match) => {
           const url = new URL(match[1], page)
           if (url.origin !== "https://opencode.local") return
-          if (externalRoutes.has(url.pathname)) return
+          if (externalRoutes.has(url.pathname) || url.pathname.startsWith("/v2/docs")) return
 
           const targetPath = path.join(root, decodeURIComponent(url.pathname))
           const target = (

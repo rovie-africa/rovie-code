@@ -2,8 +2,8 @@
 title: "Effect"
 ---
 
-`@opencode/client/effect` is the Effect-native client for the OpenCode HTTP API. It returns typed Effects and Streams
-and decodes responses into OpenCode schema values.
+`@opencode/client/effect` is the Effect-native client for the Rovie Code HTTP API. It returns typed Effects and Streams
+and decodes responses into Rovie Code schema values.
 
 ```sh
 bun add @opencode/client effect@4.0.1
@@ -14,7 +14,7 @@ bun add @opencode/client effect@4.0.1
 Create a client with the server URL, then call methods grouped by API resource.
 
 ```ts
-import { AbsolutePath, Location, OpenCode } from "@opencode/client/effect"
+import { AbsolutePath, Location, Rovie Code } from "@opencode/client/effect"
 import { Effect } from "effect"
 import { FetchHttpClient } from "effect/http"
 
@@ -48,7 +48,7 @@ const client = yield* OpenCode.make({ baseUrl: "https://opencode.example.com" })
   Effect.provideService(
     HttpClient.HttpClient,
     HttpClient.mapRequest(httpClient, (request) =>
-      HttpClientRequest.setHeaders(request, { authorization: `Bearer ${process.env.OPENCODE_TOKEN}` }),
+      HttpClientRequest.setHeaders(request, { authorization: `Bearer ${process.env.ROVIE_TOKEN}` }),
     ),
   ),
 )
@@ -66,7 +66,7 @@ import { Effect, Stream } from "effect"
 
 yield* client.event
   .subscribe()
-  .pipe(Stream.runForEach((event) => Effect.logInfo("OpenCode event", { type: event.type })))
+  .pipe(Stream.runForEach((event) => Effect.logInfo("Rovie Code event", { type: event.type })))
 ```
 
 Native and RPC event Streams share one lazy connection per client. Constructing
@@ -81,7 +81,7 @@ Use the same shared contract as Promise clients and server plugins:
 
 {/* prettier-ignore */}
 ```ts
-import { Acme } from "opencode-acme-plugin/rpc"
+import { Acme } from "rovie-acme-plugin/rpc"
 
 const acme = client.rpc(Acme)
 const result = yield* acme.search({ query: "hello" }, { location: { directory: "/workspace" } })

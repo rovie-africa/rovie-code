@@ -2,8 +2,8 @@
 title: "Overview"
 ---
 
-`@opencode/sdk` hosts OpenCode directly inside your application. Unlike the
-[network client](/build/client), it assembles the OpenCode server and routes API
+`@opencode/sdk` hosts Rovie Code directly inside your application. Unlike the
+[network client](/build/client), it assembles the Rovie Code server and routes API
 calls through its HTTP router in memory. It opens no HTTP listener and adds no
 network hop between the client and server.
 
@@ -23,7 +23,7 @@ release its router, Location services, fibers, and scoped plugin registrations:
 ```ts
 import { OpenCode } from "@opencode/sdk"
 
-await using opencode = await OpenCode.create()
+await using rovie = await OpenCode.create()
 const session = await opencode.sessions.create({
   location: { directory: "/workspace" },
 })
@@ -71,7 +71,7 @@ iteration to cancel its response body.
 
 ## Customize
 
-Customize your OpenCode instance by registering plugins. Pass plugins to
+Customize your Rovie Code instance by registering plugins. Pass plugins to
 `OpenCode.create()` to customize agents, models, tools, and other behavior when
 the embedded host starts:
 
@@ -90,7 +90,7 @@ const plugin = Plugin.define({
   },
 })
 
-await using opencode = await OpenCode.create({ plugins: [plugin] })
+await using rovie = await OpenCode.create({ plugins: [plugin] })
 ```
 
 Call `await opencode.plugin(plugin)` to register another plugin after startup.

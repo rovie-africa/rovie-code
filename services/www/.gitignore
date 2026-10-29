@@ -4,3 +4,4 @@ dist/
 node_modules/
 public/cli.json
 public/openapi.json
+public/config.json

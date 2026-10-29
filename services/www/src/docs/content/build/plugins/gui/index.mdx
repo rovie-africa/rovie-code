@@ -1,9 +1,9 @@
 ---
 title: "GUI"
-description: "Build the GUI part of an OpenCode plugin for OpenCode Desktop with @opencode/plugin/gui."
+description: "Build the GUI part of an Rovie Code plugin for Rovie Code Desktop with @opencode/plugin/gui."
 ---
 
-A GUI plugin adds panels, commands, settings pages, and native integrations to OpenCode Desktop with the GUI plugin SDK,
+A GUI plugin adds panels, commands, settings pages, and native integrations to Rovie Code Desktop with the GUI plugin SDK,
 `@opencode/plugin/gui`. It is the `./gui-experimental` part of a [plugin package](/build/plugins), alone or beside a
 [server part](/build/plugins/server) and a [TUI part](/build/plugins/cli).
 
@@ -43,11 +43,11 @@ A GUI plugin can run in two processes:
 ## Package
 
 A plugin package can ship server, TUI, and GUI code from one npm package. Add one `./gui-experimental` export beside
-`./tui`, and OpenCode Desktop loads it for each plugin on its own background server.
+`./tui`, and Rovie Code Desktop loads it for each plugin on its own background server.
 
 ```json title="package.json"
 {
-  "name": "opencode-acme-plugin",
+  "name": "rovie-acme-plugin",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -67,9 +67,9 @@ A plugin package can ship server, TUI, and GUI code from one npm package. Add on
 
 Users install it like any other plugin; there is no separate GUI install step.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "plugins": ["opencode-acme-plugin"],
+  "plugins": ["rovie-acme-plugin"],
 }
 ```
 
@@ -135,7 +135,7 @@ The preset does the following:
   bundled copy would not share the app's instance.
 
 ```text
-effect/Schema is not a module the OpenCode app provides to plugin GUIs: effect, @opencode/plugin/gui, …
+effect/Schema is not a module the Rovie Code app provides to plugin GUIs: effect, @opencode/plugin/gui, …
 ```
 
 Import from the shared entry instead, for example `import { Schema } from "effect"`.
@@ -196,13 +196,13 @@ import { readFile } from "node:fs/promises" // The main process; an inert placeh
 
 ## Where GUI entries load
 
-OpenCode Desktop loads GUI entries from its own background server, which already loads the plugins from your config, so
-they never add a new source of code. Configure the plugin in the global `opencode.json(c)` to make its GUI available in
+Rovie Code Desktop loads GUI entries from its own background server, which already loads the plugins from your config, so
+they never add a new source of code. Configure the plugin in the global `rovie.json(c)` to make its GUI available in
 every window.
 
 <Callout type="note">
-  The TUI reads its plugins from `cli.json`, but the desktop app reads only `opencode.json(c)`. A package that shipped
-  only a TUI part, and that users list in `cli.json`, must also be listed in `opencode.json(c)` once it adds
+  The TUI reads its plugins from `cli.json`, but the desktop app reads only `rovie.json(c)`. A package that shipped
+  only a TUI part, and that users list in `cli.json`, must also be listed in `rovie.json(c)` once it adds
   `./gui-experimental`.
 </Callout>
 
@@ -224,10 +224,10 @@ vite build --watch
   ignored.
 - Each rebuild reloads the plugin's GUI in every window and in the main process. The server entry does not restart.
 - An installed package's GUI changes only with its version.
-- Changing the plugin's `options` in `opencode.json(c)` reloads the plugin.
-- `opencode plugin update` replaces a package's GUI once the update finishes.
+- Changing the plugin's `options` in `rovie.json(c)` reloads the plugin.
+- `rovie plugin update` replaces a package's GUI once the update finishes.
 - [**Settings > Extensions > Plugins**](/plugins#desktop) lists the plugin with a switch that turns its GUI off. To
-  remove it, remove it from `opencode.json(c)` or run `opencode plugin remove <package>`.
+  remove it, remove it from `rovie.json(c)` or run `rovie plugin remove <package>`.
 
 <Callout type="note">
   The app's own plugins reserve their ids. If your plugin's id is one of them, nests under one with a `.`, has one
@@ -358,16 +358,16 @@ export default Plugin.define({ ...definition, setup, main })
 
 ## Shared context
 
-Both setups receive the plugin's options, a client for the OpenCode server, and app metadata, like the server and TUI
+Both setups receive the plugin's options, a client for the Rovie Code server, and app metadata, like the server and TUI
 parts.
 
 ### Options
 
-`ctx.options` holds the `options` from the plugin's `opencode.json(c)` entry: the same values the server part gets.
+`ctx.options` holds the `options` from the plugin's `rovie.json(c)` entry: the same values the server part gets.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "plugins": [{ "package": "opencode-acme-plugin", "options": { "team": "core" } }],
+  "plugins": [{ "package": "rovie-acme-plugin", "options": { "team": "core" } }],
 }
 ```
 
@@ -381,7 +381,7 @@ setup(ctx) {
 
 ### Server client
 
-`ctx.client` is the OpenCode client of the server that runs the plugin: the desktop app's own server. Use it to call
+`ctx.client` is the Rovie Code client of the server that runs the plugin: the desktop app's own server. Use it to call
 your server part through its [RPC](/build/plugins/rpc).
 
 ```ts
@@ -500,7 +500,7 @@ restarts, so read it where you use it.
 
 ```tsx title="src/gui.tsx"
 import { Plugin, Slot } from "@opencode/plugin/gui"
-import { AcmeBadge } from "opencode-acme-plugin/contract"
+import { AcmeBadge } from "rovie-acme-plugin/contract"
 
 export default Plugin.define({
   setup(ctx) {
@@ -1360,7 +1360,7 @@ interface SetupContext<D> extends Context {
 interface Context {
   id: string
   options: PluginOptions
-  client: OpenCodeClient
+  client: Rovie CodeClient
   app: App
   signal: AbortSignal
   add<T>(registry: Registry<T>, item: () => T | undefined): Cleanup
@@ -1788,7 +1788,7 @@ interface ServerRef {
   name: string
   url: string
   password?: string
-  client: OpenCodeClient
+  client: Rovie CodeClient
   data: Data
   local: boolean
   builtin: boolean
@@ -2807,7 +2807,7 @@ interface Browser {
 
 ## The main process
 
-On OpenCode Desktop, a plugin's `main` setup runs once in the Electron main process as an app-wide singleton. It has
+On Rovie Code Desktop, a plugin's `main` setup runs once in the Electron main process as an app-wide singleton. It has
 full access to Node.js built-ins, `electron`, and the main host APIs. Pass it to `Plugin.define` in the plugin's
 [`./gui-experimental` file](#define-the-gui-plugin), beside the window `setup` or on its own.
 
@@ -2872,7 +2872,7 @@ main(ctx) {
 - `ctx.windows` lists the app's windows and reports when one opens or closes.
 - `ctx.embeds` places a `WebContentsView` in a window's layout; see [Embedded web views](#embedded-web-views).
 - `ctx.serverEndpoints.get(id)` returns a server's URL and credentials. The desktop app's own server is `"sidecar"`.
-- `ctx.cli` describes the OpenCode CLI the desktop app runs.
+- `ctx.cli` describes the Rovie Code CLI the desktop app runs.
 - `ctx.log.write` writes to the desktop log file.
 
 #### Reference
@@ -2883,7 +2883,7 @@ main(ctx) {
 interface MainContext {
   id: string
   options: PluginOptions
-  client: OpenCodeClient
+  client: Rovie CodeClient
   app: App
   signal: AbortSignal
   onCleanup(fn: Cleanup): void

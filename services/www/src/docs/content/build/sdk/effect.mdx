@@ -14,7 +14,7 @@ bun add @opencode/sdk effect@4.0.1
 Create the host inside `Effect.scoped`, then use its generated API groups or the `sessions` alias.
 
 ```ts
-import { AbsolutePath, Location, OpenCode } from "@opencode/sdk/effect"
+import { AbsolutePath, Location, Rovie Code } from "@opencode/sdk/effect"
 import { Effect } from "effect"
 
 const program = Effect.scoped(
@@ -51,14 +51,14 @@ background.
 import { Effect, Stream } from "effect"
 
 yield* opencode.events.subscribe().pipe(
-  Stream.runForEach((event) => Effect.logInfo("OpenCode event", { type: event.type })),
+  Stream.runForEach((event) => Effect.logInfo("Rovie Code event", { type: event.type })),
   Effect.forkScoped,
 )
 ```
 
 ## Customize
 
-Customize your OpenCode instance by registering Effect plugins. Use the embedded
+Customize your Rovie Code instance by registering Effect plugins. Use the embedded
 host to customize agents, models, tools, and other behavior:
 
 ```ts

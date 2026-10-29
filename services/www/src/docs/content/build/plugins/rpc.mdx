@@ -106,7 +106,7 @@ errors: {
 }
 ```
 
-Error names beginning with `rpc.` are reserved by OpenCode.
+Error names beginning with `rpc.` are reserved by Rovie Code.
 
 ### Events
 
@@ -166,12 +166,12 @@ Once the RPC is registered, it can be called over HTTP or from another plugin.
 
 ### HTTP
 
-Create an OpenCode client, then use `client.rpc` to create a subclient for the
+Create an Rovie Code client, then use `client.rpc` to create a subclient for the
 RPC:
 
 ```ts
 import { OpenCode } from "@opencode/client"
-import { Acme } from "opencode-acme-plugin/rpc"
+import { Acme } from "rovie-acme-plugin/rpc"
 
 const client = OpenCode.make({
   baseUrl: "http://localhost:4096",
@@ -183,12 +183,12 @@ const result = await acme.search({ query: "hello" })
 
 ### Plugin
 
-Plugins already have an OpenCode client. For example, a TUI plugin can create
+Plugins already have an Rovie Code client. For example, a TUI plugin can create
 the same RPC subclient from `context.client`:
 
 ```ts title="src/tui.ts"
 import { Plugin } from "@opencode/plugin/tui"
-import { Acme } from "opencode-acme-plugin/rpc"
+import { Acme } from "rovie-acme-plugin/rpc"
 
 export default Plugin.define({
   id: "acme-tui",
@@ -204,7 +204,7 @@ A [GUI plugin](/build/plugins/gui) reads the client of the desktop app's own ser
 
 ```tsx title="src/gui.tsx"
 import { Command, Plugin } from "@opencode/plugin/gui"
-import { Acme } from "opencode-acme-plugin/rpc"
+import { Acme } from "rovie-acme-plugin/rpc"
 
 export default Plugin.define({
   setup(ctx) {

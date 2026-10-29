@@ -1,24 +1,24 @@
 ---
 title: "Settings"
-description: "Configure every OpenCode CLI and TUI setting."
+description: "Configure every Rovie Code CLI and TUI setting."
 ---
 
 CLI settings control the terminal clients only. They are separate from the server and project settings in
-`opencode.json(c)`.
+`rovie.json(c)`.
 
 Press `Ctrl+P`, then select **Open settings** to change common settings from the TUI.
 
-<img src={`${import.meta.env.BASE_URL}assets/docs/cli/settings.png`} alt="OpenCode TUI settings dialog" />
+<img src={`${import.meta.env.BASE_URL}assets/docs/cli/settings.png`} alt="Rovie Code TUI settings dialog" />
 
 ## Configuration file
 
-OpenCode stores CLI settings in one global file:
+Rovie Code stores CLI settings in one global file:
 
 ```text
-~/.config/opencode/cli.json
+~/.config/rovie/cli.json
 ```
 
-When `$XDG_CONFIG_HOME` is set, OpenCode uses:
+When `$XDG_CONFIG_HOME` is set, Rovie Code uses:
 
 ```text
 $XDG_CONFIG_HOME/opencode/cli.json
@@ -28,11 +28,11 @@ There is no project-local CLI settings file. Add the published JSON Schema for v
 
 ```json title="cli.json"
 {
-  "$schema": "https://opencode.ai/v2/cli.json"
+  "$schema": "https://code.rovie.africa/v2/cli.json"
 }
 ```
 
-OpenCode adds `$schema` when it creates or migrates this file. Valid edits reload while the TUI is running.
+Rovie Code adds `$schema` when it creates or migrates this file. Valid edits reload while the TUI is running.
 
 Unknown settings are ignored. Keep `$schema` so your editor flags invalid values.
 
@@ -44,7 +44,7 @@ Set `OPENCODE_CLI_CONFIG_CONTENT` to apply CLI settings from inline JSON:
 OPENCODE_CLI_CONFIG_CONTENT='{"tabs":{"mode":"off"}}' opencode
 ```
 
-OpenCode merges the inline settings over the global `cli.json`. Nested objects are merged, while arrays and scalar
+Rovie Code merges the inline settings over the global `cli.json`. Nested objects are merged, while arrays and scalar
 values from the environment replace global values. Inline settings remain authoritative while the variable is set.
 
 ## Appearance
@@ -161,7 +161,7 @@ Configure the persistent session tab strip:
 }
 ```
 
-The legacy boolean `tabs.enabled` setting remains supported: `true` is `on` and `false` is `off`. OpenCode reads it without rewriting the config file.
+The legacy boolean `tabs.enabled` setting remains supported: `true` is `on` and `false` is `off`. Rovie Code reads it without rewriting the config file.
 
 <div class="docs-table-scroll" role="region" aria-label="Tab settings" tabIndex={0}>
 
@@ -277,7 +277,7 @@ Configure terminal integration:
 
 ## Mini
 
-The `mini` group controls [`opencode mini`](/cli#mini), the minimal interactive interface:
+The `mini` group controls [`rovie mini`](/cli#mini), the minimal interactive interface:
 
 ```json title="cli.json"
 {

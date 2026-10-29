@@ -2,24 +2,24 @@
 title: "Config"
 ---
 
-Create `opencode.jsonc` in your project to configure OpenCode. Add the schema for editor validation, then set only the options you need.
+Create `rovie.jsonc` in your project to configure Rovie Code. Add the schema for editor validation, then set only the options you need.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "$schema": "https://opencode.ai/config.json",
+  "$schema": "https://code.rovie.africa/config.json",
   "model": "anthropic/claude-sonnet-5-5",
 }
 ```
 
-You can also ask OpenCode to update this file for you.
+You can also ask Rovie Code to update this file for you.
 
 ## Format
 
-OpenCode supports JSON and JSONC. Use JSONC when you want comments or trailing commas.
+Rovie Code supports JSON and JSONC. Use JSONC when you want comments or trailing commas.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "$schema": "https://opencode.ai/config.json",
+  "$schema": "https://code.rovie.africa/config.json",
   // Use this model by default.
   "model": "anthropic/claude-sonnet-5-5",
 }
@@ -31,29 +31,29 @@ Put managed, machine-wide settings in the system configuration directory:
 
 | Platform | Directory                               |
 | -------- | --------------------------------------- |
-| macOS    | `/Library/Application Support/opencode` |
-| Linux    | `/etc/opencode`                         |
-| Windows  | `%ProgramData%\opencode`                |
+| macOS    | `/Library/Application Support/rovie` |
+| Linux    | `/etc/rovie`                         |
+| Windows  | `%ProgramData%\rovie`                |
 
 The system directory works like the global directory. Besides
-`opencode.json(c)`, it loads `agents/`, `commands/`, `skills/`, and `plugins/`
+`rovie.json(c)`, it loads `agents/`, `commands/`, `skills/`, and `plugins/`
 for every user on the machine:
 
 ```text
-/etc/opencode/
-├── opencode.json
+/etc/rovie/
+├── rovie.json
 ├── agents/review.md
 ├── commands/release.md
 └── skills/deploy/SKILL.md
 ```
 
-On macOS, OpenCode also reads managed preferences that MDM tools deploy for the
-`ai.opencode.managed` domain. A user-specific profile replaces the
+On macOS, Rovie Code also reads managed preferences that MDM tools deploy for the
+`africa.rovie.code.managed` domain. A user-specific profile replaces the
 machine-wide one:
 
 ```text
-/Library/Managed Preferences/<user>/ai.opencode.managed.plist
-/Library/Managed Preferences/ai.opencode.managed.plist
+/Library/Managed Preferences/<user>/africa.rovie.code.managed.plist
+/Library/Managed Preferences/africa.rovie.code.managed.plist
 ```
 
 Managed settings have the highest precedence, so users and projects cannot
@@ -65,42 +65,42 @@ configuration to enforce restrictions.
 Put user settings for every project in the global configuration:
 
 ```text
-~/.config/opencode/opencode.json(c)
+~/.config/rovie/rovie.json(c)
 ```
 
 Put project settings in either of these files:
 
 ```text
-/home/user/projects/my-app/opencode.json(c)
-/home/user/projects/my-app/.opencode/opencode.json(c)
+/home/user/projects/my-app/rovie.json(c)
+/home/user/projects/my-app/.rovie/rovie.json(c)
 ```
 
-OpenCode searches from the current directory to the filesystem root. It first
-merges direct `opencode.json(c)` files from the farthest directory to the
-closest, then merges files inside `.opencode` directories in the same order.
-This means every discovered `.opencode` config overrides every direct config.
+Rovie Code searches from the current directory to the filesystem root. It first
+merges direct `rovie.json(c)` files from the farthest directory to the
+closest, then merges files inside `.rovie` directories in the same order.
+This means every discovered `.rovie` config overrides every direct config.
 Use one form throughout a directory tree unless you need that behavior.
 
-For example, start OpenCode from `/home/user/projects/acme/packages/web`:
+For example, start Rovie Code from `/home/user/projects/acme/packages/web`:
 
 ```text
-/etc/opencode/opencode.json
-~/.config/opencode/opencode.json
+/etc/rovie/rovie.json
+~/.config/rovie/rovie.json
 
 /home/user/projects/acme/
-├── opencode.json
+├── rovie.json
 └── packages/
     └── web/
-        ├── opencode.json
+        ├── rovie.json
         └── src/
 ```
 
-OpenCode applies these files from lowest to highest precedence:
+Rovie Code applies these files from lowest to highest precedence:
 
-1. `~/.config/opencode/opencode.json`
-2. `/home/user/projects/acme/opencode.json`
-3. `/home/user/projects/acme/packages/web/opencode.json`
-4. `/etc/opencode/opencode.json`
+1. `~/.config/rovie/rovie.json`
+2. `/home/user/projects/acme/rovie.json`
+3. `/home/user/projects/acme/packages/web/rovie.json`
+4. `/etc/rovie/rovie.json`
 
 The package config overrides matching settings from the repository config,
 which overrides the global config. The system config overrides all of them.
@@ -110,15 +110,15 @@ policies outrank all of them.
 
 ## Schema
 
-The complete OpenCode configuration schema is available at
-[opencode.ai/config.json](https://opencode.ai/config.json).
+The complete Rovie Code configuration schema is available at
+[code.rovie.africa/config.json](https://code.rovie.africa/config.json).
 
 Add the `$schema` field to your configuration file to enable validation and
 autocomplete in editors that support JSON Schema:
 
-```json title="opencode.json"
+```json title="rovie.json"
 {
-  "$schema": "https://opencode.ai/config.json"
+  "$schema": "https://code.rovie.africa/config.json"
 }
 ```
 
@@ -178,7 +178,7 @@ Project-level values are ignored.
 
 ### Username
 
-Set a username. OpenCode accepts this field but does not display it in
+Set a username. Rovie Code accepts this field but does not display it in
 conversations.
 
 ```jsonc
@@ -317,7 +317,7 @@ Set the maximum number of lines and bytes retained from a tool result.
 
 ### Search
 
-Choose how OpenCode searches the web. Use `"random"` to select an available
+Choose how Rovie Code searches the web. Use `"random"` to select an available
 provider automatically.
 
 ```jsonc
@@ -412,7 +412,7 @@ and cost considerations.
 
 ### Skills
 
-Add directories or URLs that OpenCode should search for agent skills.
+Add directories or URLs that Rovie Code should search for agent skills.
 
 ```jsonc
 {
@@ -420,7 +420,7 @@ Add directories or URLs that OpenCode should search for agent skills.
 }
 ```
 
-See the [skills guide](/skills) for skill structure and automatic discovery under `.opencode/skills/`.
+See the [skills guide](/skills) for skill structure and automatic discovery under `.rovie/skills/`.
 
 ### Commands
 
@@ -441,7 +441,7 @@ See the [commands guide](/commands) for arguments, models, agents, and file-base
 
 ### Instructions
 
-Declare additional instruction files, globs, or HTTP(S) URLs. OpenCode loads
+Declare additional instruction files, globs, or HTTP(S) URLs. Rovie Code loads
 them alongside discovered `AGENTS.md` files.
 
 ```jsonc
@@ -476,7 +476,7 @@ See the [references guide](/references) for shorthand, visibility, and path reso
 
 ### Worktrees
 
-Set the parent directory for new local worktrees. OpenCode appends the requested or generated worktree name.
+Set the parent directory for new local worktrees. Rovie Code appends the requested or generated worktree name.
 
 ```jsonc
 {
@@ -516,7 +516,7 @@ accepts options.
 ```jsonc
 {
   "plugins": [
-    "opencode-example-plugin",
+    "rovie-example-plugin",
     {
       "package": "./plugins/local",
       "options": {
@@ -565,10 +565,10 @@ You can use variable substitution in your config files to reference environment 
 
 Use `{env:VARIABLE_NAME}` to substitute environment variables:
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "$schema": "https://opencode.ai/config.json",
-  "model": "{env:OPENCODE_MODEL}",
+  "$schema": "https://code.rovie.africa/config.json",
+  "model": "{env:ROVIE_MODEL}",
   "providers": {
     "anthropic": {
       "settings": {
@@ -585,9 +585,9 @@ If the environment variable is not set, it will be replaced with an empty string
 
 Use `{file:path/to/file}` to substitute the contents of a file:
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "$schema": "https://opencode.ai/config.json",
+  "$schema": "https://code.rovie.africa/config.json",
   "providers": {
     "openai": {
       "settings": {
@@ -619,9 +619,9 @@ These are useful for:
 
 All experimental settings live under the `experimental` key:
 
-```jsonc title="opencode.jsonc"
+```jsonc title="rovie.jsonc"
 {
-  "$schema": "https://opencode.ai/config.json",
+  "$schema": "https://code.rovie.africa/config.json",
   "experimental": {
     "todo": true,
     "subagent_depth": 2,
@@ -662,7 +662,7 @@ automatic compaction doesn't pause the session. Defaults to `false`. See
 
 ### Location idle timeout
 
-`location_idle_timeout` controls how long a project location can go without session activity before OpenCode unloads
+`location_idle_timeout` controls how long a project location can go without session activity before Rovie Code unloads
 its services. It takes a duration such as `"2 hours"` and defaults to `"60 minutes"`. Running sessions and background
 jobs keep a location loaded. Set it to `false` to never unload idle locations. Project config can override the global
 value.

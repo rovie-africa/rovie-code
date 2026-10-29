@@ -20,7 +20,7 @@ export async function generate() {
 
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://opencode.ai/config.json",
+    $id: "https://code.rovie.africa/config.json",
     type: "object",
     properties: merge(describe(current.properties ?? {}), previous.properties ?? {}),
     additionalProperties: false,
