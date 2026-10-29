@@ -172,9 +172,9 @@ jobs:
         include:
           - { target: linux-arm64, host: ubuntu-24.04-arm }
           - { target: linux-x64, host: ubuntu-24.04 }
-          - { target: darwin-arm64, host: macos-26 }
-          - { target: windows-arm64, host: windows-2025 }
-          - { target: windows-x64, host: windows-2025 }
+          - { target: darwin-arm64, host: macos-14 }
+          - { target: windows-arm64, host: windows-2022 }
+          - { target: windows-x64, host: windows-2022 }
     runs-on: ${{ matrix.host }}
     env: *env
     steps:
@@ -284,14 +284,14 @@ jobs:
       matrix:
         include:
           - target: darwin-x64
-            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'macos-26' || 'macos-26-intel' }}
-            install: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && '--os=darwin --cpu=*' || '--os=darwin --cpu=x64' }}
-          - { target: darwin-arm64, host: macos-26, install: --os=darwin --cpu=arm64 }
+            host: macos-13
+            install: --os=darwin --cpu=x64
+          - { target: darwin-arm64, host: macos-14, install: --os=darwin --cpu=arm64 }
           # github-hosted: blacksmith lacks the ARM64 MSVC cross-compilation toolchain
           - target: windows-arm64
-            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'windows-2025' || 'windows-2025' }}
+            host: windows-2022
             install: --cpu=*
-          - { target: windows-x64, host: windows-2025 }
+          - { target: windows-x64, host: windows-2022 }
           - { target: linux-x64, host: ubuntu-24.04 }
           - { target: linux-arm64, host: ubuntu-24.04-arm }
     runs-on: ${{ matrix.host }}
@@ -350,9 +350,9 @@ jobs:
       matrix:
         include:
           - target: windows-arm64
-            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'windows-2025' || 'windows-2025' }}
+            host: windows-2022
             install: --cpu=*
-          - { target: windows-x64, host: windows-2025 }
+          - { target: windows-x64, host: windows-2022 }
     runs-on: ${{ matrix.host }}
     env: *env
     steps:
@@ -387,7 +387,7 @@ jobs:
   sign-macos:
     needs: [plan, build-npm, build-desktop]
     if: ${{ !cancelled() && !failure() && (needs.plan.outputs.cli == 'true' || needs.plan.outputs.desktop == 'true') }}
-    runs-on: macos-26
+    runs-on: macos-14
     timeout-minutes: 90
     environment: ${{ needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     env: *env
@@ -402,8 +402,12 @@ jobs:
       # The certificate has no password, which apple-actions/import-codesign-certs rejects. The sign scripts look up
       # the identity in build.keychain, and codesign finds the key through the user search list.
       - name: Import certificate
-        if: needs.plan.outputs.dry_run != 'true' && secrets.APPLE_SIGNING_CERTIFICATE != ''
+        if: needs.plan.outputs.dry_run != 'true'
         run: |
+          if [ -z "$APPLE_SIGNING_CERTIFICATE" ]; then
+            echo "No Apple signing certificate found; skipping import (will use ad-hoc signing)"
+            exit 0
+          fi
           cert="$RUNNER_TEMP/cert.p12"
           keychain_password=$(openssl rand -base64 32)
           printf '%s' "$APPLE_SIGNING_CERTIFICATE" | base64 --decode > "$cert"
@@ -444,12 +448,15 @@ jobs:
   sign-windows:
     needs: [plan, build-npm, build-desktop]
     if: ${{ !cancelled() && !failure() && (needs.plan.outputs.cli == 'true' || needs.plan.outputs.desktop == 'true') }}
-    runs-on: windows-2025
+    runs-on: windows-2022
     environment: ${{ needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     permissions:
       contents: read
       id-token: write
-    env: *env
+    env:
+      OPENCODE_VERSION: ${{ needs.plan.outputs.version }}
+      OPENCODE_CHANNEL: ${{ needs.plan.outputs.channel }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
     steps:
@@ -462,7 +469,7 @@ jobs:
         run: bash .github/release/unpack-windows.sh "$RUNNER_TEMP/in" "$RUNNER_TEMP/work"
       - &azure-login
         name: Log in to Azure
-        if: needs.plan.outputs.dry_run != 'true' && secrets.AZURE_CLIENT_ID != ''
+        if: needs.plan.outputs.dry_run != 'true' && env.AZURE_CLIENT_ID != ''
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -470,7 +477,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - &azure-sign
         name: Sign
-        if: needs.plan.outputs.dry_run != 'true' && secrets.AZURE_CLIENT_ID != ''
+        if: needs.plan.outputs.dry_run != 'true' && env.AZURE_CLIENT_ID != ''
         uses: azure/artifact-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16 # v1.2.0
         with:
           endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
@@ -514,12 +521,15 @@ jobs:
   sign-desktop-windows-installer:
     needs: [plan, build-desktop-windows-installer]
     if: ${{ !cancelled() && !failure() && needs.plan.outputs.desktop == 'true' }}
-    runs-on: windows-2025
+    runs-on: windows-2022
     environment: ${{ needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     permissions:
       contents: read
       id-token: write
-    env: *env
+    env:
+      OPENCODE_VERSION: ${{ needs.plan.outputs.version }}
+      OPENCODE_CHANNEL: ${{ needs.plan.outputs.channel }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
     steps:

@@ -2,8 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rovie-code-www",
   "compatibility_date": "2026-07-25",
-  "workers_dev": false,
-  "preview_urls": false,
+  "workers_dev": true,
+  "preview_urls": true,
   "cache": {
     "enabled": true,
   },
@@ -16,21 +16,11 @@
   "env": {
     "dev": {
       "name": "rovie-code-www-dev",
-      "routes": [
-        {
-          "pattern": "dev.rovie.africa/code*",
-          "zone_name": "rovie.africa",
-        },
-      ],
+      "workers_dev": true,
     },
     "production": {
       "name": "rovie-code-www-production",
-      "routes": [
-        {
-          "pattern": "rovie.africa/code*",
-          "zone_name": "rovie.africa",
-        },
-      ],
+      "workers_dev": true,
     },
   },
 }

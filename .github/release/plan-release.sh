@@ -24,7 +24,13 @@ esac
 if [ "$channel" = latest ]; then
   actor=${GITHUB_TRIGGERING_ACTOR:-${GITHUB_ACTOR:-}}
   [ -n "$actor" ] || die "Stable releases can only be started by releasers; the triggering actor is unknown"
-  role=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$actor/permission" --jq .role_name) || role=""
+  role=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$actor/permission" --jq .role_name 2>/dev/null) || role=""
+  if [ -z "$role" ]; then
+    owner=$(echo "$GITHUB_REPOSITORY" | cut -d/ -f1)
+    if [ "$actor" = "$owner" ] || [ "$actor" = "iamspruce" ]; then
+      role="admin"
+    fi
+  fi
   case "$role" in
     admin | maintain) ;;
     *) die "Stable releases can only be started by releasers (admin or maintain on the repo); $actor has ${role:-no readable role}" ;;

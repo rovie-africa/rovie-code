@@ -3,17 +3,17 @@
   "name": "rovie-code-files",
   "main": "src/index.ts",
   "compatibility_date": "2026-08-01",
-  "workers_dev": false,
-  "preview_urls": false,
+  "workers_dev": true,
+  "preview_urls": true,
   "env": {
     "dev": {
       "name": "rovie-code-dev-files",
-      "routes": [{ "pattern": "dev.rovie.africa/files/*", "zone_name": "rovie.africa" }],
+      "workers_dev": true,
       "r2_buckets": [{ "binding": "FILES", "bucket_name": "rovie-code-dev-files" }],
     },
     "production": {
       "name": "rovie-code-production-files",
-      "routes": [{ "pattern": "rovie.africa/files/*", "zone_name": "rovie.africa" }],
+      "workers_dev": true,
       "r2_buckets": [{ "binding": "FILES", "bucket_name": "rovie-code-production-files" }],
     },
   },

@@ -153,9 +153,9 @@ jobs:
         include:
           - { target: linux-arm64, host: ubuntu-24.04-arm }
           - { target: linux-x64, host: ubuntu-24.04 }
-          - { target: darwin-arm64, host: macos-26 }
-          - { target: windows-arm64, host: windows-2025 }
-          - { target: windows-x64, host: windows-2025 }
+          - { target: darwin-arm64, host: macos-14 }
+          - { target: windows-arm64, host: windows-2022 }
+          - { target: windows-x64, host: windows-2022 }
     runs-on: ${{ matrix.host }}
     env: *env
     steps:
@@ -265,14 +265,14 @@ jobs:
       matrix:
         include:
           - target: darwin-x64
-            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'macos-26' || 'macos-26-intel' }}
+            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'macos-14' || 'macos-13' }}
             install: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && '--os=darwin --cpu=*' || '--os=darwin --cpu=x64' }}
-          - { target: darwin-arm64, host: macos-26, install: --os=darwin --cpu=arm64 }
+          - { target: darwin-arm64, host: macos-14, install: --os=darwin --cpu=arm64 }
           # github-hosted: blacksmith lacks the ARM64 MSVC cross-compilation toolchain
           - target: windows-arm64
-            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'windows-2025' || 'windows-2025' }}
+            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'windows-2022' || 'windows-2022' }}
             install: --cpu=*
-          - { target: windows-x64, host: windows-2025 }
+          - { target: windows-x64, host: windows-2022 }
           - { target: linux-x64, host: ubuntu-24.04 }
           - { target: linux-arm64, host: ubuntu-24.04-arm }
     runs-on: ${{ matrix.host }}
@@ -331,9 +331,9 @@ jobs:
       matrix:
         include:
           - target: windows-arm64
-            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'windows-2025' || 'windows-2025' }}
+            host: ${{ (needs.plan.outputs.channel == 'dev' || needs.plan.outputs.channel == 'beta') && 'windows-2022' || 'windows-2022' }}
             install: --cpu=*
-          - { target: windows-x64, host: windows-2025 }
+          - { target: windows-x64, host: windows-2022 }
     runs-on: ${{ matrix.host }}
     env: *env
     steps:
@@ -368,7 +368,7 @@ jobs:
   sign-macos:
     needs: [plan, build-npm, build-desktop]
     if: ${{ !cancelled() && !failure() && (needs.plan.outputs.cli == 'true' || needs.plan.outputs.desktop == 'true') }}
-    runs-on: macos-26
+    runs-on: macos-14
     timeout-minutes: 90
     environment: ${{ needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     env: *env
@@ -425,7 +425,7 @@ jobs:
   sign-windows:
     needs: [plan, build-npm, build-desktop]
     if: ${{ !cancelled() && !failure() && (needs.plan.outputs.cli == 'true' || needs.plan.outputs.desktop == 'true') }}
-    runs-on: windows-2025
+    runs-on: windows-2022
     environment: ${{ needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     permissions:
       contents: read
@@ -495,7 +495,7 @@ jobs:
   sign-desktop-windows-installer:
     needs: [plan, build-desktop-windows-installer]
     if: ${{ !cancelled() && !failure() && needs.plan.outputs.desktop == 'true' }}
-    runs-on: windows-2025
+    runs-on: windows-2022
     environment: ${{ needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     permissions:
       contents: read

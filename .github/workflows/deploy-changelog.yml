@@ -3,6 +3,7 @@ name: deploy-changelog
 on:
   push:
     branches:
+      - main
       - dev
     paths:
       - services/changelog/**

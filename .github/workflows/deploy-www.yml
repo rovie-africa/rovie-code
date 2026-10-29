@@ -3,6 +3,7 @@ name: deploy-www
 on:
   push:
     branches:
+      - main
       - dev
       - production
   workflow_dispatch:

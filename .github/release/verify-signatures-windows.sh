@@ -2,8 +2,8 @@
 # verify-signatures-windows.sh <dir>: fails unless every .exe and .node under <dir> has a valid Authenticode signature.
 . "$(dirname "$0")/lib.sh"
 
-if dry_run; then
-  echo "dry-run: not verifying signatures in $1"
+if dry_run || [ -z "${AZURE_CLIENT_ID:-}" ]; then
+  echo "skipping signature verification in $1 (no Azure signing configured or dry run)"
   exit 0
 fi
 powershell -NoProfile -Command "

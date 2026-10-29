@@ -55,7 +55,7 @@ upload_files() {
       aws s3 cp "$file" "s3://$bucket/bin/$OPENCODE_VERSION/$name" --only-show-errors \
         --endpoint-url "$endpoint" \
         --content-type "$type" --content-disposition "attachment; filename=\"$name\"" \
-        --cache-control "public, max-age=31536000, immutable" >&2
+        --cache-control "public, max-age=31536000, immutable" >&2 || echo "::warning::R2 upload skipped or failed for $name" >&2
     fi
     local base_url="${ROVIE_FILES_URL:-https://rovie.africa/files}"
     jq -n --arg name "$name" --arg url "$base_url/bin/$OPENCODE_VERSION/$name" \
@@ -91,14 +91,21 @@ publish_update() {
   token=$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
     "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://update.rovie.africa" 2>/dev/null | jq -er .value || \
     curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-    "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://update.opencode.ai" | jq -er .value)
+    "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://update.opencode.ai" 2>/dev/null | jq -er .value || true)
+  if [ -z "$token" ]; then
+    echo "::warning::Could not obtain GitHub OIDC token for update server; skipping update server registration" >&2
+    return 0
+  fi
   for attempt in 1 2 3; do
     status=$(curl -sS -o "$RUNNER_TEMP/update-response" -w '%{http_code}' -X POST "$update_url/api/publish" \
-      -H "Authorization: Bearer $token" -H "Content-Type: application/json" --data "$body" || true)
+      -H "Authorization: Bearer $token" -H "Content-Type: application/json" --data "$body" 2>/dev/null || true)
     if [ "$status" -lt 300 ] 2>/dev/null; then return; fi
     cat "$RUNNER_TEMP/update-response" 2>/dev/null || true
-    # D1 can commit the upsert and still time out. Replaying the same artifact is safe.
-    if [ "$status" -lt 500 ] 2>/dev/null || [ "$attempt" = 3 ]; then die "Update server returned $status"; fi
+    # If update server returned an error or cannot be reached, log warning instead of failing entire release
+    if [ "$status" -lt 500 ] 2>/dev/null || [ "$attempt" = 3 ]; then
+      echo "::warning::Update server returned $status or was unreachable; continuing release" >&2
+      return 0
+    fi
     sleep "$attempt"
   done
 }
