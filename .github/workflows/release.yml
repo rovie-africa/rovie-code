@@ -285,7 +285,7 @@ jobs:
         include:
           - target: darwin-x64
             host: macos-14
-            install: --os=darwin --cpu=x64
+            install: --os=darwin --cpu=*
           - { target: darwin-arm64, host: macos-14, install: --os=darwin --cpu=arm64 }
           # github-hosted: blacksmith lacks the ARM64 MSVC cross-compilation toolchain
           - target: windows-arm64
