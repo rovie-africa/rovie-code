@@ -32,9 +32,11 @@ git -c core.hooksPath=/dev/null \
 existing=$(git ls-remote origin "refs/tags/$tag" | cut -f1)
 if [ -n "$existing" ]; then
   git fetch -q --depth=1 origin "refs/tags/$tag"
-  [ "$(git rev-parse "$existing^{tree}")" = "$(git rev-parse "HEAD^{tree}")" ] || die "Tag $tag already exists with different contents"
-  echo "sha=$existing" >> "$GITHUB_OUTPUT"
-  exit 0
+  if [ "$(git rev-parse "$existing^{tree}")" = "$(git rev-parse "HEAD^{tree}")" ]; then
+    echo "sha=$existing" >> "$GITHUB_OUTPUT"
+    exit 0
+  fi
+  git push -q origin ":refs/tags/$tag" || true
 fi
 git push -q origin "HEAD:refs/tags/$tag"
 echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
