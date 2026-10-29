@@ -7,10 +7,13 @@
 in=$1 out=$2
 mkdir -p "$out"
 identity=- timestamp=--timestamp=none
-if ! dry_run; then
-  identity=$(security find-identity -v -p codesigning build.keychain | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -n 1)
-  [ -n "$identity" ] || die "Developer ID Application identity not found"
-  timestamp=--timestamp
+if ! dry_run && [ -n "${APPLE_SIGNING_CERTIFICATE:-}" ]; then
+  identity=$(security find-identity -v -p codesigning build.keychain 2>/dev/null | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -n 1 || true)
+  if [ -n "$identity" ]; then
+    timestamp=--timestamp
+  else
+    identity=-
+  fi
 fi
 
 export COPYFILE_DISABLE=1

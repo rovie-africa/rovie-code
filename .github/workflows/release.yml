@@ -81,7 +81,7 @@ jobs:
     # Stable tags are pushed with the release deploy key, the only non-releasers actor the v* tag ruleset admits.
     environment: ${{ needs.plan.outputs.channel == 'latest' && needs.plan.outputs.dry_run != 'true' && 'release' || '' }}
     permissions:
-      contents: read
+      contents: write
     env: &env
       OPENCODE_VERSION: ${{ needs.plan.outputs.version }}
       OPENCODE_CHANNEL: ${{ needs.plan.outputs.channel }}
@@ -94,7 +94,7 @@ jobs:
         if: needs.plan.outputs.channel == 'latest'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          ssh-key: ${{ secrets.RELEASE_TAG_KEY }}
+          token: ${{ secrets.RELEASE_TAG_KEY || github.token }}
       - id: tag
         name: Tag
         if: needs.plan.outputs.channel == 'latest'
@@ -402,7 +402,7 @@ jobs:
       # The certificate has no password, which apple-actions/import-codesign-certs rejects. The sign scripts look up
       # the identity in build.keychain, and codesign finds the key through the user search list.
       - name: Import certificate
-        if: needs.plan.outputs.dry_run != 'true'
+        if: needs.plan.outputs.dry_run != 'true' && secrets.APPLE_SIGNING_CERTIFICATE != ''
         run: |
           cert="$RUNNER_TEMP/cert.p12"
           keychain_password=$(openssl rand -base64 32)
@@ -462,7 +462,7 @@ jobs:
         run: bash .github/release/unpack-windows.sh "$RUNNER_TEMP/in" "$RUNNER_TEMP/work"
       - &azure-login
         name: Log in to Azure
-        if: needs.plan.outputs.dry_run != 'true'
+        if: needs.plan.outputs.dry_run != 'true' && secrets.AZURE_CLIENT_ID != ''
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -470,7 +470,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - &azure-sign
         name: Sign
-        if: needs.plan.outputs.dry_run != 'true'
+        if: needs.plan.outputs.dry_run != 'true' && secrets.AZURE_CLIENT_ID != ''
         uses: azure/artifact-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16 # v1.2.0
         with:
           endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}

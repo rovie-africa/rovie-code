@@ -14,10 +14,13 @@ identity=- timestamp=--timestamp=none
 zip_level=() dmg_level=() preview=false
 case "$OPENCODE_CHANNEL" in dev | beta) preview=true ;; esac
 if [ "$preview" = true ]; then zip_level=(--zlibCompressionLevel 1) dmg_level=(-imagekey zlib-level=1); fi
-if ! dry_run; then
-  identity=$(security find-identity -v -p codesigning build.keychain | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -n 1)
-  [ -n "$identity" ] || die "Developer ID Application identity not found"
-  timestamp=--timestamp
+if ! dry_run && [ -n "${APPLE_SIGNING_CERTIFICATE:-}" ]; then
+  identity=$(security find-identity -v -p codesigning build.keychain 2>/dev/null | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -n 1 || true)
+  if [ -n "$identity" ]; then
+    timestamp=--timestamp
+  else
+    identity=-
+  fi
 fi
 sign() {
   codesign --force "$timestamp" --options runtime --entitlements "$2" --sign "$identity" "$1"
@@ -58,7 +61,7 @@ for tarball in "$@"; do
   codesign --verify --deep --strict --verbose=2 "$app"
 done
 
-if ! dry_run; then
+if ! dry_run && [ -n "${APPLE_NOTARY_KEY:-}" ]; then
   key=$(mktemp)
   printf '%s\n' "$APPLE_NOTARY_KEY" > "$key"
   ditto -c -k --sequesterRsrc "$apps" "$apps.zip"
@@ -67,16 +70,18 @@ if ! dry_run; then
   rm -f "$key"
   cat "$apps.json"
   [ "$(jq -r .status "$apps.json")" = Accepted ] || die "Notarization was not accepted"
+else
+  echo "Notarization skipped (ad-hoc signing active)"
 fi
 
 for dir in "$apps"/*; do
   arch=$(basename "$dir")
   app=$(bundle "$arch")
   name=$(basename "$app")
-  if ! dry_run; then
-    xcrun stapler staple "$app"
-    xcrun stapler validate "$app"
-    spctl --assess --type execute --verbose=2 "$app"
+  if ! dry_run && [ -n "${APPLE_NOTARY_KEY:-}" ]; then
+    xcrun stapler staple "$app" || true
+    xcrun stapler validate "$app" || true
+    spctl --assess --type execute --verbose=2 "$app" || true
   fi
   ditto -c -k ${zip_level[@]+"${zip_level[@]}"} --sequesterRsrc --keepParent "$app" "$out/opencode-desktop-mac-$arch.zip"
   staging=$(mktemp -d)

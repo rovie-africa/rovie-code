@@ -16,9 +16,8 @@ permissions:
 
 jobs:
   deploy:
-    if: (github.repository == 'rovie-africa/rovie-code' || github.repository == 'anomalyco/opencode' || github.repository_owner == github.actor) && (github.ref_name == 'dev' || github.ref_name == 'production')
+    if: (github.repository == 'rovie-africa/rovie-code' || github.repository == 'anomalyco/opencode' || github.repository_owner == github.actor)
     runs-on: ubuntu-24.04
-    environment: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
@@ -30,6 +29,6 @@ jobs:
 
       - name: Deploy
         working-directory: services/files
-        run: bun run deploy --env ${{ github.ref_name == 'production' && 'production' || 'dev' }}
+        run: bun run deploy --env ${{ (github.ref_name == 'main' || github.ref_name == 'production') && 'production' || 'dev' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

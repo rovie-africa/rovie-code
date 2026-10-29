@@ -10,7 +10,9 @@ for target in darwin-arm64 darwin-x64 darwin-x64-baseline; do cli+=("$macos/open
 for target in windows-arm64 windows-x64 windows-x64-baseline; do cli+=("$windows/opencode-$target.zip"); done
 
 files=$(upload_files "${cli[@]}")
-publish_update cli npm '{"package": "@opencode/cli"}'
+npm_package="${ROVIE_NPM_PACKAGE:-@rovie/cli}"
+publish_update cli npm "{\"package\": \"$npm_package\"}"
+publish_update cli rovie "$(jq -n --argjson files "$files" '{files: $files}')"
 publish_update cli opencode "$(jq -n --argjson files "$files" '{files: $files}')"
 
 if [ "$OPENCODE_CHANNEL" != latest ]; then
@@ -18,6 +20,7 @@ if [ "$OPENCODE_CHANNEL" != latest ]; then
   for target in linux-arm64 linux-x64; do node+=("$archives/opencode2-node-$target.tar.gz"); done
   for target in darwin-arm64 windows-arm64 windows-x64; do node+=("$archives/opencode2-node-$target.zip"); done
   files=$(upload_files "${node[@]}")
-  publish_update cli-node npm '{"package": "@opencode/cli-node"}'
+  publish_update cli-node npm "{\"package\": \"$npm_package-node\"}"
+  publish_update cli-node rovie "$(jq -n --argjson files "$files" '{files: $files}')"
   publish_update cli-node opencode "$(jq -n --argjson files "$files" '{files: $files}')"
 fi

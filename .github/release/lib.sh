@@ -31,7 +31,7 @@ size() {
   wc -c < "$1" | tr -d ' '
 }
 
-# Uploads files to opencode.ai/files/bin/<version>/ and prints the update-server file map.
+# Uploads files to files.rovie.africa/bin/<version>/ and prints the update-server file map.
 upload_files() {
   local credentials=false
   for file in "$@"; do
@@ -50,12 +50,15 @@ upload_files() {
         r2_credentials
         credentials=true
       fi
-      aws s3 cp "$file" "s3://opencode-production-files/bin/$OPENCODE_VERSION/$name" --only-show-errors \
-        --endpoint-url "https://$CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com" \
+      local bucket="${CLOUDFLARE_R2_BUCKET:-rovie-code-production-files}"
+      local endpoint="${CLOUDFLARE_S3_API_ENDPOINT:-https://$CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com}"
+      aws s3 cp "$file" "s3://$bucket/bin/$OPENCODE_VERSION/$name" --only-show-errors \
+        --endpoint-url "$endpoint" \
         --content-type "$type" --content-disposition "attachment; filename=\"$name\"" \
         --cache-control "public, max-age=31536000, immutable" >&2
     fi
-    jq -n --arg name "$name" --arg url "https://opencode.ai/files/bin/$OPENCODE_VERSION/$name" \
+    local base_url="${ROVIE_FILES_URL:-https://rovie.africa/files}"
+    jq -n --arg name "$name" --arg url "$base_url/bin/$OPENCODE_VERSION/$name" \
       --arg sha256 "$(sha256 "$file" | cut -c1-64)" --argjson size "$(size "$file")" \
       '{($name): {url: $url, sha256: $sha256, size: $size}}'
   done | jq -s 'add'
@@ -63,12 +66,17 @@ upload_files() {
 
 # R2 accepts the API token ID as the access key and SHA-256(token) as the secret.
 r2_credentials() {
-  local id
-  id=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-    "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/tokens/verify" | jq -er .result.id)
-  export AWS_ACCESS_KEY_ID="$id"
-  AWS_SECRET_ACCESS_KEY=$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sha256 | cut -c1-64)
-  export AWS_SECRET_ACCESS_KEY
+  if [ -n "${CLOUDFLARE_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_SECRET_ACCESS_KEY:-}" ]; then
+    export AWS_ACCESS_KEY_ID="$CLOUDFLARE_ACCESS_KEY_ID"
+    export AWS_SECRET_ACCESS_KEY="$CLOUDFLARE_SECRET_ACCESS_KEY"
+  else
+    local id
+    id=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+      "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/tokens/verify" | jq -er .result.id)
+    export AWS_ACCESS_KEY_ID="$id"
+    AWS_SECRET_ACCESS_KEY=$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sha256 | cut -c1-64)
+    export AWS_SECRET_ACCESS_KEY
+  fi
   export AWS_DEFAULT_REGION=auto AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
 }
 
@@ -79,15 +87,18 @@ publish_update() {
     --argjson metadata "$3" '{channel: $channel, name: $name, distribution: $distribution, version: $version, metadata: $metadata}')
   echo "$body" | jq .
   if dry_run; then return; fi
+  local update_url="${ROVIE_UPDATE_URL:-https://update.rovie.africa}"
   token=$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+    "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://update.rovie.africa" 2>/dev/null | jq -er .value || \
+    curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
     "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://update.opencode.ai" | jq -er .value)
   for attempt in 1 2 3; do
-    status=$(curl -sS -o "$RUNNER_TEMP/update-response" -w '%{http_code}' -X POST https://opencode.ai/update/api/publish \
-      -H "Authorization: Bearer $token" -H "Content-Type: application/json" --data "$body")
-    if [ "$status" -lt 300 ]; then return; fi
-    cat "$RUNNER_TEMP/update-response"
+    status=$(curl -sS -o "$RUNNER_TEMP/update-response" -w '%{http_code}' -X POST "$update_url/api/publish" \
+      -H "Authorization: Bearer $token" -H "Content-Type: application/json" --data "$body" || true)
+    if [ "$status" -lt 300 ] 2>/dev/null; then return; fi
+    cat "$RUNNER_TEMP/update-response" 2>/dev/null || true
     # D1 can commit the upsert and still time out. Replaying the same artifact is safe.
-    if [ "$status" -lt 500 ] || [ "$attempt" = 3 ]; then die "Update server returned $status"; fi
+    if [ "$status" -lt 500 ] 2>/dev/null || [ "$attempt" = 3 ]; then die "Update server returned $status"; fi
     sleep "$attempt"
   done
 }

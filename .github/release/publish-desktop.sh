@@ -28,4 +28,5 @@ files=$(upload_files "${win[@]}" "${mac[@]}" "${linux[@]}" "${linux_arm[@]}" "${
 manifests=$(jq -n --argjson win "$(feed "${win[@]}")" --argjson mac "$(feed "${mac[@]}")" \
   --argjson linux "$(feed "${linux[@]}")" --argjson linux_arm64 "$(feed "${linux_arm[@]}")" \
   '{"desktop.yml": $win, "desktop-mac.yml": $mac, "desktop-linux.yml": $linux, "desktop-linux-arm64.yml": $linux_arm64}')
+publish_update desktop rovie "$(jq -n --argjson files "$files" --argjson manifests "$manifests" '{files: $files, manifests: $manifests}')"
 publish_update desktop opencode "$(jq -n --argjson files "$files" --argjson manifests "$manifests" '{files: $files, manifests: $manifests}')"
