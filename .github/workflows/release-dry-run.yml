@@ -403,8 +403,10 @@ jobs:
       - name: Sign desktop
         if: needs.plan.outputs.desktop == 'true'
         run: |
-          bash .github/release/sign-desktop-macos.sh "$RUNNER_TEMP/out" \
-            "$RUNNER_TEMP"/in/build-desktop-darwin-*/opencode-desktop-mac-*.app.tar
+          shopt -s nullglob
+          tarballs=("$RUNNER_TEMP"/in/build-desktop-darwin-*/*desktop-mac-*.app.tar)
+          [ ${#tarballs[@]} -gt 0 ] || { echo "No desktop app tarballs found"; exit 1; }
+          bash .github/release/sign-desktop-macos.sh "$RUNNER_TEMP/out" "${tarballs[@]}"
         env:
           APPLE_NOTARY_KEY: ${{ secrets.APPLE_NOTARY_KEY }}
           APPLE_NOTARY_KEY_ID: ${{ vars.APPLE_NOTARY_KEY_ID }}

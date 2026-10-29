@@ -6,7 +6,7 @@
 
 assets=$(mktemp -d)
 for dir in "$@"; do
-  find "$dir" -maxdepth 1 -type f \( -name 'opencode-*.zip' -o -name 'opencode-*.tar.gz' -o -name 'opencode-desktop-*' -o -name 'rovie-*' \) \
+  find "$dir" -maxdepth 1 -type f \( -name 'opencode-*.zip' -o -name 'opencode-*.tar.gz' -o -name 'opencode-desktop-*' -o -name 'rovie-*' -o -name 'rovie-code-*' \) \
     ! -name '*.tgz' ! -name '*.app.tar' -exec cp {} "$assets/" \;
 done
 (cd "$assets" && sha256 -- * > SHA256SUMS && cat SHA256SUMS)

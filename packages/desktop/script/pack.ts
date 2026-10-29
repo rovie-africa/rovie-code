@@ -37,12 +37,19 @@ if (app) {
   await $`bun ./script/copy-icons.ts ${resolveChannel()}`
   await $`bunx electron-builder ${flags} --prepackaged ${app}`
   await cp(`dist/rovie-code-desktop-win-${cli.cpu}.exe`, path.join(out, `rovie-code-desktop-win-${cli.cpu}.exe`))
+  await cp(`dist/rovie-code-desktop-win-${cli.cpu}.exe`, path.join(out, `opencode-desktop-win-${cli.cpu}.exe`))
 }
 
 if (!app && os === "linux") {
   await $`bunx electron-builder ${flags}`
   const files = (await readdir("dist")).filter((file) => /\.(AppImage|deb|rpm)$/.test(file))
   await Promise.all(files.map((file) => cp(path.join("dist", file), path.join(out, file))))
+  for (const file of files) {
+    if (file.startsWith("rovie-code-desktop-")) {
+      const alias = file.replace("rovie-code-desktop-", "opencode-desktop-")
+      await cp(path.join("dist", file), path.join(out, alias))
+    }
+  }
 }
 
 if (!app && os === "mac") {
@@ -53,6 +60,7 @@ if (!app && os === "mac") {
   if (bundles.length !== 1) throw new Error(`Expected one .app bundle in ${parent}, found ${bundles.join(", ")}`)
   await writeUpdateConfig(path.join(parent, bundles[0], "Contents", "Resources"))
   await $`tar -cf ${path.join(out, `rovie-code-desktop-mac-${cli.cpu}.app.tar`)} -C ${parent} ${bundles[0]}`
+  await $`tar -cf ${path.join(out, `opencode-desktop-mac-${cli.cpu}.app.tar`)} -C ${parent} ${bundles[0]}`
 }
 
 if (!app && os === "win") {

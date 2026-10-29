@@ -36,10 +36,27 @@ manifests Anomaly.OpenCode "OpenCode CLI" "The open source AI coding agent for t
   "- Architecture: x64" "  InstallerUrl: $base/opencode-windows-x64-baseline.zip" "  InstallerSha256: $(sum "$cli/opencode-windows-x64-baseline.zip")" \
   "- Architecture: arm64" "  InstallerUrl: $base/opencode-windows-arm64.zip" "  InstallerSha256: $(sum "$cli/opencode-windows-arm64.zip")"
 
+resolve_file() {
+  local dir=$1
+  shift
+  for candidate in "$@"; do
+    if [ -s "$dir/$candidate" ]; then
+      printf '%s\n' "$dir/$candidate"
+      return 0
+    fi
+  done
+  printf '%s\n' "$dir/$1"
+}
+
+win_x64=$(resolve_file "$desktop" "rovie-code-desktop-win-x64.exe" "opencode-desktop-win-x64.exe")
+win_arm64=$(resolve_file "$desktop" "rovie-code-desktop-win-arm64.exe" "opencode-desktop-win-arm64.exe")
+win_x64_name=$(basename "$win_x64")
+win_arm64_name=$(basename "$win_arm64")
+
 # The display name and uninstall key match what the NSIS installer registers for ai.opencode.desktop.
 manifests Anomaly.OpenCode.Desktop "OpenCode" "The open source AI coding agent as a desktop app." opencode-desktop \
   "InstallerType: nullsoft" "Scope: user" "UpgradeBehavior: install" "ProductCode: d074f30d-5f88-5885-b075-be1348cc7676" \
   "Protocols:" "- opencode" "Installers:" \
-  "- Architecture: x64" "  InstallerUrl: $base/opencode-desktop-win-x64.exe" "  InstallerSha256: $(sum "$desktop/opencode-desktop-win-x64.exe")" \
-  "- Architecture: arm64" "  InstallerUrl: $base/opencode-desktop-win-arm64.exe" "  InstallerSha256: $(sum "$desktop/opencode-desktop-win-arm64.exe")"
+  "- Architecture: x64" "  InstallerUrl: $base/$win_x64_name" "  InstallerSha256: $(sum "$win_x64")" \
+  "- Architecture: arm64" "  InstallerUrl: $base/$win_arm64_name" "  InstallerSha256: $(sum "$win_arm64")"
 tail -n +1 "$out"/*/*

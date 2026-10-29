@@ -29,10 +29,18 @@ bundle() {
   find "$apps/$1" -mindepth 1 -maxdepth 1 -name '*.app' -type d
 }
 
+seen_archs=()
 for tarball in "$@"; do
+  [ -f "$tarball" ] || continue
   arch=$(basename "$tarball" .app.tar)
+  arch=${arch#rovie-code-desktop-mac-}
   arch=${arch#opencode-desktop-mac-}
+  arch=${arch#rovie-desktop-mac-}
   [ "$arch" = arm64 ] || [ "$arch" = x64 ] || die "Unexpected app tarball: $tarball"
+  if printf '%s\n' "${seen_archs[@]}" | grep -qxF "$arch"; then
+    continue
+  fi
+  seen_archs+=("$arch")
   mkdir -p "$apps/$arch"
   tar -xf "$tarball" -C "$apps/$arch"
   if [ "$(find "$apps/$arch" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')" != 1 ] || [ -z "$(bundle "$arch")" ]; then
@@ -83,11 +91,14 @@ for dir in "$apps"/*; do
     xcrun stapler validate "$app" || true
     spctl --assess --type execute --verbose=2 "$app" || true
   fi
-  ditto -c -k ${zip_level[@]+"${zip_level[@]}"} --sequesterRsrc --keepParent "$app" "$out/opencode-desktop-mac-$arch.zip"
+  ditto -c -k ${zip_level[@]+"${zip_level[@]}"} --sequesterRsrc --keepParent "$app" "$out/rovie-code-desktop-mac-$arch.zip"
+  cp "$out/rovie-code-desktop-mac-$arch.zip" "$out/opencode-desktop-mac-$arch.zip"
   staging=$(mktemp -d)
   ditto "$app" "$staging/$name"
   ln -s /Applications "$staging/Applications"
-  hdiutil create -volname "${name%.app}" -srcfolder "$staging" -fs HFS+ -format UDZO ${dmg_level[@]+"${dmg_level[@]}"} -ov "$out/opencode-desktop-mac-$arch.dmg"
+  hdiutil create -volname "${name%.app}" -srcfolder "$staging" -fs HFS+ -format UDZO ${dmg_level[@]+"${dmg_level[@]}"} -ov "$out/rovie-code-desktop-mac-$arch.dmg"
+  cp "$out/rovie-code-desktop-mac-$arch.dmg" "$out/opencode-desktop-mac-$arch.dmg"
   if [ "$preview" = true ]; then continue; fi
-  COPYFILE_DISABLE=1 tar --no-mac-metadata -czf "$out/opencode-desktop-mac-$arch.app.tar.gz" -C "$dir" "$name"
+  COPYFILE_DISABLE=1 tar --no-mac-metadata -czf "$out/rovie-code-desktop-mac-$arch.app.tar.gz" -C "$dir" "$name"
+  cp "$out/rovie-code-desktop-mac-$arch.app.tar.gz" "$out/opencode-desktop-mac-$arch.app.tar.gz"
 done
