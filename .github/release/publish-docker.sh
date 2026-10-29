@@ -7,4 +7,9 @@ image="$1/opencode-image.tar"
 skopeo inspect --raw "oci-archive:$image" | jq .
 if dry_run; then exit 0; fi
 printf '%s' "$GH_TOKEN" | skopeo login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-skopeo copy --all "oci-archive:$image" "docker://ghcr.io/anomalyco/opencode:$OPENCODE_VERSION"
+repo_owner=$(echo "${GITHUB_REPOSITORY:-rovie-africa/rovie-code}" | cut -d/ -f1 | tr '[:upper:]' '[:lower:]')
+repo_name=$(echo "${GITHUB_REPOSITORY:-rovie-africa/rovie-code}" | cut -d/ -f2 | tr '[:upper:]' '[:lower:]')
+skopeo copy --all "oci-archive:$image" "docker://ghcr.io/$repo_owner/$repo_name:$OPENCODE_VERSION"
+if [ "$OPENCODE_CHANNEL" = "latest" ]; then
+  skopeo copy --all "oci-archive:$image" "docker://ghcr.io/$repo_owner/$repo_name:latest" || true
+fi

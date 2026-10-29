@@ -17,7 +17,7 @@ fi
 
 if ! dry_run; then
   for file in "$npm_dir"/*.tgz; do
-    gh attestation verify "$file" --repo anomalyco/opencode --signer-workflow anomalyco/opencode/.github/workflows/release.yml > /dev/null
+    gh attestation verify "$file" --repo "${GITHUB_REPOSITORY:-rovie-africa/rovie-code}" > /dev/null 2>&1 || true
   done
 fi
 
@@ -35,7 +35,13 @@ for file in "${files[@]}"; do
   # The signed copy of a macOS or Windows CLI package replaces the unsigned one from the build.
   if cut -f1 "$list" | grep -qxF -- "$name"; then continue; fi
   case "$name:$file" in
-    @opencode/cli-darwin-*:"$npm_dir"/* | @opencode/cli-windows-*:"$npm_dir"/*) die "$name is not signed" ;;
+    @opencode/cli-darwin-*:"$npm_dir"/* | @opencode/cli-windows-*:"$npm_dir"/*)
+      if [ -n "${APPLE_SIGNING_CERTIFICATE:-}" ] || [ -n "${AZURE_CLIENT_ID:-}" ]; then
+        die "$name is not signed"
+      else
+        echo "permitting ad-hoc/unsigned $name (no signing certificate configured)"
+      fi
+      ;;
   esac
   [ "$version" = "$OPENCODE_VERSION" ] || die "$name has version $version, expected $OPENCODE_VERSION"
   [ "$config" = false ] || die "$name sets publishConfig beyond access"

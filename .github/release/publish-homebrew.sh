@@ -3,13 +3,9 @@
 # with its write deploy key (HOMEBREW_TAP_DEPLOY_KEY) and registers the homebrew update artifact.
 . "$(dirname "$0")/lib.sh"
 
-if ! dry_run; then
-  test -n "${HOMEBREW_TAP_DEPLOY_KEY:-}" || die "Missing HOMEBREW_TAP_DEPLOY_KEY"
-  ssh_dir=$(mktemp -d)
-  printf '%s\n' "$HOMEBREW_TAP_DEPLOY_KEY" > "$ssh_dir/key"
-  chmod 600 "$ssh_dir/key"
-  echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$ssh_dir/known_hosts"
-  export GIT_SSH_COMMAND="ssh -i $ssh_dir/key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$ssh_dir/known_hosts"
+if [ -z "${HOMEBREW_TAP_DEPLOY_KEY:-}" ]; then
+  echo "::warning::Missing HOMEBREW_TAP_DEPLOY_KEY; skipping Homebrew tap update"
+  exit 0
 fi
 
 push_git "git@github.com:anomalyco/homebrew-tap.git" \
