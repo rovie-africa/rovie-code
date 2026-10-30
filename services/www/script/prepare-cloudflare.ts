@@ -18,4 +18,13 @@ delete config.kv_namespaces
 delete config.images
 delete config.previews
 
+if (process.env.CLOUDFLARE_ENV === "production") {
+  config.routes = [
+    {
+      pattern: "code.rovie.africa",
+      custom_domain: true,
+    },
+  ]
+}
+
 await Bun.write("dist/server/wrangler.json", JSON.stringify(config))

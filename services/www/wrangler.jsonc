@@ -4,23 +4,35 @@
   "compatibility_date": "2026-07-25",
   "workers_dev": true,
   "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "code.rovie.africa",
+      "custom_domain": true
+    }
+  ],
   "cache": {
-    "enabled": true,
+    "enabled": true
   },
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist/client",
     "html_handling": "drop-trailing-slash",
-    "not_found_handling": "404-page",
+    "not_found_handling": "404-page"
   },
   "env": {
     "dev": {
       "name": "rovie-code-www-dev",
-      "workers_dev": true,
+      "workers_dev": true
     },
     "production": {
       "name": "rovie-code-www-production",
       "workers_dev": true,
-    },
-  },
+      "routes": [
+        {
+          "pattern": "code.rovie.africa",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
 }
