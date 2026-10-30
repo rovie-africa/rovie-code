@@ -35,3 +35,4 @@ jobs:
         run: bun run deploy || (echo "=== WRANGLER LOG ===" && cat /home/runner/.config/.wrangler/logs/*.log && exit 1)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_LOG_SANITIZE: "false"
